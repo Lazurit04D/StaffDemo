@@ -17,6 +17,11 @@ string Engineer::getProject() const
     return project;
 }
 
+double Engineer::getBudget() const
+{
+    return budget;
+}
+
 string Engineer::getPosition() const
 {
     return "Engineer";
@@ -26,3 +31,10 @@ void Engineer::setProject(const string& project)
 {
     this->project = project;
 }
+
+void Engineer::setBudget(const double budget)
+{
+    this->budget = budget;
+}
+
+void Engineer::syncBudgetsFromFile() {}

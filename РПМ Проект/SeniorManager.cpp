@@ -1,5 +1,7 @@
 #include "SeniorManager.h"
 #include <iostream>
+#include <fstream>
+#include <sstream>
 using namespace std;
 
 SeniorManager::SeniorManager(int id, const string& name, const vector<double>& budgets, int peopleCount) : Employee(id, name), budgets(budgets), peopleCount(peopleCount) {}
@@ -43,7 +45,47 @@ void SeniorManager::printInfo() const
         << payment << '\n';
 }
 
+double SeniorManager::getBudget() const
+{
+    return 0.0;
+}
+
 string SeniorManager::getPosition() const
 {
     return "SeniorManager";
+}
+
+void SeniorManager::setProject(const string& project) {}
+
+void SeniorManager::setBudget(const double budget) {}
+
+void SeniorManager::syncBudgetsFromFile()
+{
+    ifstream in("staff.txt");
+    string line;
+
+    while (getline(in, line))
+    {
+        istringstream iss(line);
+        vector<string> tokens;
+        string token;
+        while (iss >> token)
+        {
+            tokens.push_back(token);
+        }
+
+        if (!tokens.empty() && tokens[2] == "SeniorManager" && stoi(tokens[0]) == this->id)
+        {
+            int count = stoi(tokens[3]);
+            budgets.clear();
+
+            for (int i = 0; i < count; ++i)
+            {
+                budgets.push_back(stod(tokens[4 + i]));
+            }
+            break;
+        }
+    }
+
+    in.close();
 }

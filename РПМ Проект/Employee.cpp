@@ -21,5 +21,3 @@ int Employee::getId() const
 {
     return id;
 }
-
-void Employee::setProject(const string& project) {}

@@ -43,6 +43,11 @@ string ProjectManager::getProject() const
     return project;
 }
 
+double ProjectManager::getBudget() const
+{
+    return budget;
+}
+
 string ProjectManager::getPosition() const
 {
     return "ProjectManager";
@@ -52,3 +57,10 @@ void ProjectManager::setProject(const string& project)
 {
     this->project = project;
 }
+
+void ProjectManager::setBudget(const double budget)
+{
+    this->budget = budget;
+}
+
+void ProjectManager::syncBudgetsFromFile() {}

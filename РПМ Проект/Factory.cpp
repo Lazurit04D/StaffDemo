@@ -41,9 +41,9 @@ vector<Employee*> StaffFactory::makeStaff(const string& filename)
         }
         else if (position == "Driver")
         {
-            iss >> rate >> bonus;
+            iss >> rate >> extra;
             Driver* d = new Driver(id, name, rate);
-            d->setNightHours(bonus);
+            d->setNightHours(extra);
             staff.push_back(d);
         }
         else if (position == "Programmer")

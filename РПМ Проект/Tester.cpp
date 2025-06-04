@@ -16,3 +16,8 @@ void Tester::setProject(const string& project)
 {
     this->project = project;
 }
+
+void Tester::setBudget(const double budget)
+{
+    this->budget = budget;
+}

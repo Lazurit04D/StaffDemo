@@ -12,7 +12,15 @@ double Driver::calcBonus()
     return rate * nightHours;
 }
 
+double Driver::getBudget() const
+{
+    return 0.0;
+}
+
 string Driver::getPosition() const
 {
     return "Driver";
 }
+
+void Driver::setProject(const string& project) {}
+void Driver::setBudget(const double budget) {}

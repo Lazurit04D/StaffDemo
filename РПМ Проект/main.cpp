@@ -44,6 +44,186 @@ string toLower(const string& s)
     return result;
 }
 
+double getOrCreateProjectBudget(const string& projectName)
+{
+    ifstream in("staff.txt");
+    string line;
+    double foundBudget = -1;
+
+    while (getline(in, line))
+    {
+        istringstream iss(line);
+        vector<string> tokens;
+        string token;
+        while (iss >> token)
+        {
+            tokens.push_back(token);
+        }
+
+        if (tokens.size() >= 6)
+        {
+            string pos = tokens[2];
+
+            if ((pos == "Programmer" || pos == "Tester" || pos == "TeamLeader") && tokens[5] == projectName)
+            {
+                foundBudget = stod(tokens[4]);
+                break;
+            }
+            else if (pos == "ProjectManager" && tokens[4] == projectName)
+            {
+                foundBudget = stod(tokens[3]);
+                break;
+            }
+        }
+    }
+    in.close();
+
+    if (foundBudget != -1)
+    {
+        return foundBudget;
+    }
+
+    double newBudget;
+    cout << "Введите бюджет проекта: ";
+    while (!(cin >> newBudget))
+    {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "Нужно число!\nВведите бюджет проекта: ";
+    }
+
+    ifstream in2("staff.txt");
+    vector<string> lines;
+    while (getline(in2, line))
+    {
+        istringstream iss(line);
+        vector<string> tokens;
+        string token;
+        while (iss >> token)
+        {
+            tokens.push_back(token);
+        }
+
+        if (!tokens.empty() && tokens[2] == "SeniorManager")
+        {
+            int count = stoi(tokens[3]);
+            vector<double> budgets;
+
+            for (int i = 0; i < count; ++i)
+            {
+                budgets.push_back(stod(tokens[4 + i]));
+            }
+
+            budgets.push_back(newBudget);
+            sort(budgets.begin(), budgets.end());
+
+            tokens[3] = to_string(budgets.size());
+            
+            vector<string> extraTokens;
+            for (size_t i = 4 + count; i < tokens.size(); ++i)
+            {
+                extraTokens.push_back(tokens[i]);
+            }
+
+            tokens.resize(4);
+            for (double b : budgets)
+            {
+                tokens.push_back(to_string(b));
+            }
+
+            tokens.insert(tokens.end(), extraTokens.begin(), extraTokens.end());
+
+            ostringstream oss;
+            for (const string& t : tokens)
+            {
+                oss << t << ' ';
+            }
+            line = oss.str();
+            line.pop_back();
+        }
+
+        lines.push_back(line);
+    }
+    in2.close();
+
+    ofstream out("staff.txt");
+    for (const string& l : lines)
+    {
+        out << l << '\n';
+    }
+    out.close();
+
+    return newBudget;
+}
+
+void removeBudgetFromFile(double budgetToRemove)
+{
+    ifstream in("staff.txt");
+    vector<string> lines;
+    string line;
+
+    while (getline(in, line))
+    {
+        istringstream iss(line);
+        vector<string> tokens;
+        string token;
+        while (iss >> token)
+        {
+            tokens.push_back(token);
+        }
+
+        if (!tokens.empty() && tokens[2] == "SeniorManager")
+        {
+            int count = stoi(tokens[3]);
+            vector<double> budgets;
+
+            for (int i = 0; i < count; ++i)
+            {
+                budgets.push_back(stod(tokens[4 + i]));
+            }
+
+            for (auto it = budgets.begin(); it != budgets.end(); )
+            {
+                if (abs(*it - budgetToRemove) < 1e-6)
+                {
+                    it = budgets.erase(it);
+                }
+                else
+                {
+                    ++it;
+                }
+            }
+
+            tokens.erase(tokens.begin() + 4, tokens.begin() + 4 + count);
+
+            tokens[3] = to_string(budgets.size());
+            for (int i = 0; i < budgets.size(); ++i)
+            {
+                tokens.insert(tokens.begin() + 4 + i, to_string(budgets[i]));
+            }
+
+            ostringstream oss;
+            for (const string& t : tokens)
+            {
+                oss << t << ' ';
+            }
+            line = oss.str(); line.pop_back();
+        }
+
+        lines.push_back(line);
+    }
+
+    in.close();
+
+    ofstream out("staff.txt");
+    for (const string& l : lines)
+    {
+        out << l << '\n';
+    }
+    out.close();
+}
+
+
 void printHeader()
 {
     cout << endl;
@@ -120,16 +300,25 @@ void findByName(const vector<Employee*>& staff, const string& name)
 
 void findByPayment(const vector<Employee*>& staff, double amount, bool more)
 {
+    bool found = false;
+
     for (Employee* emp : staff)
     {
         if (more && emp->getPayment() > amount)
         {
             emp->printInfo();
+            found = true;
         }
         else if (!more && emp->getPayment() < amount)
         {
             emp->printInfo();
+            found = true;
         }
+    }
+
+    if (!found)
+    {
+        cout << "Ничего не найдено!\n";
     }
 }
 
@@ -212,8 +401,9 @@ int main()
     SetConsoleCP(1251);
     SetConsoleOutputCP(1251);
 
+    int standartWorkTime = 50;
     vector<Employee*> staff = StaffFactory::makeStaff("staff.txt");
-    setWorkTimeForAll(staff, 50);
+    setWorkTimeForAll(staff, standartWorkTime);
 
     while (true)
     {
@@ -289,13 +479,13 @@ int main()
             while (true)
             {
                 cout << "Введите сумму: ";
-                if (cin >> amount)
+                if (cin >> amount && (amount > 0))
                 {
                     break;
                 }
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                cout << "Нужно число!\n";
+                cout << "Нужно положительное число!\n";
             }
 
             findByPayment(staff, amount, mode == 1);
@@ -305,7 +495,7 @@ int main()
             int id = 1;
             string name, position, project;
             double rate, budget, bonus;
-            int extra;
+            int posChoice, extra;
 
             ifstream file("staff.txt");
             string line;
@@ -321,19 +511,55 @@ int main()
 
             cout << "Имя (через _): ";
             cin >> name;
-            cout << "Должность (Programmer / Tester / TeamLeader / ProjectManager): ";
-            cin >> position;
+            cout << "Выберете должность:\n[1] - Programmer\n[2] - Tester\n[3] - TeamLeader\n[4] - ProjectManager\nВаш выбор: ";
+            cin >> posChoice;
+            if (posChoice == 1)
+            {
+                position = "Programmer";
+            }
+            else if (posChoice == 2)
+            {
+                position = "Tester";
+            }
+            else if (posChoice == 3)
+            {
+                position = "TeamLeader";
+            }
+            else if (posChoice == 4)
+            {
+                position = "ProjectManager";
+            }
 
             if (position == "Programmer")
             {
-                cout << "Введите почасовую ставку: "; cin >> rate;
-                cout << "Введите название проекта: "; cin >> project;
-                //TODO Сделать проверку, что если проект уже существует, то берём бюджет из него
-                cout << "Введите бюджет проекта: "; cin >> budget;
-                //TODO После добавления нового проекта/бюджета заносить его в SeniorManager
-                cout << "Введите премию: "; cin >> bonus;
+                while (true)
+                {
+                    cout << "Введите почасовую ставку: ";
+                    if (cin >> rate && (rate > 0))
+                    {
+                        break;
+                    }
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    cout << "Нужно положительное число!\n";
+                }
+                cout << "Введите название проекта: ";
+                cin >> project;
+                budget = getOrCreateProjectBudget(project);
+                while (true)
+                {
+                    cout << "Введите премию: ";
+                    if (cin >> bonus && (bonus > 0))
+                    {
+                        break;
+                    }
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    cout << "Нужно положительное число!\n";
+                }
                 auto* p = new Programmer(id, name, rate, budget, project, bonus);
-                p->setWorkTime(160); p->calc();
+                p->setWorkTime(standartWorkTime);
+                p->calc();
                 staff.push_back(p);
                 appendToStaffFile(to_string(id) + ' ' + name + ' ' + position + ' ' + to_string(rate) + ' ' + to_string(budget) + ' ' + project + ' ' + to_string(bonus));
                 addOrUpdateProject(id, project, budget);
@@ -341,14 +567,34 @@ int main()
             }
             else if (position == "Tester")
             {
-                cout << "Введите почасовую ставку: "; cin >> rate;
-                cout << "Введите название проекта: "; cin >> project;
-                //TODO Сделать проверку, что если проект уже существует, то берём бюджет из него
-                cout << "Введите бюджет проекта: "; cin >> budget;
-                //TODO После добавления нового проекта/бюджета заносить его в SeniorManager
-                cout << "Введите количество багов: "; cin >> extra;
+                while (true)
+                {
+                    cout << "Введите почасовую ставку: ";
+                    if (cin >> rate && (rate > 0))
+                    {
+                        break;
+                    }
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    cout << "Нужно положительное число!\n";
+                }
+                cout << "Введите название проекта: ";
+                cin >> project;
+                budget = getOrCreateProjectBudget(project);
+                while (true)
+                {
+                    cout << "Введите количество багов: ";
+                    if (cin >> extra && (extra > 0))
+                    {
+                        break;
+                    }
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    cout << "Нужно положительное число!\n";
+                }
                 auto* p = new Tester(id, name, rate, budget, project, extra);
-                p->setWorkTime(160); p->calc();
+                p->setWorkTime(standartWorkTime);
+                p->calc();
                 staff.push_back(p);
                 appendToStaffFile(to_string(id) + ' ' + name + ' ' + position + ' ' + to_string(rate) + ' ' + to_string(budget) + ' ' + project + ' ' + to_string(extra));
                 addOrUpdateProject(id, project, budget);
@@ -356,29 +602,58 @@ int main()
             }
             else if (position == "TeamLeader")
             {
-                cout << "Введите почасовую ставку: "; cin >> rate;
-                cout << "Введите название проекта: "; cin >> project;
-                //TODO Сделать проверку, что если проект уже существует, то берём бюджет из него
-                cout << "Введите бюджет проекта: "; cin >> budget;
-                //TODO После добавления нового проекта/бюджета заносить его в SeniorManager
-                cout << "Введите премию: "; cin >> bonus;
-                cout << "Введите размер команды: "; cin >> extra;
-                auto* p = new TeamLeader(id, name, rate, budget, project, bonus, extra);
-                p->setWorkTime(160); p->calc();
+                while (true)
+                {
+                    cout << "Введите почасовую ставку: ";
+                    if (cin >> rate && (rate > 0))
+                    {
+                        break;
+                    }
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    cout << "Нужно положительное число!\n";
+                }
+                cout << "Введите название проекта: ";
+                cin >> project;
+                budget = getOrCreateProjectBudget(project);
+                while (true)
+                {
+                    cout << "Введите размер команды: ";
+                    if (cin >> extra && (extra > 0))
+                    {
+                        break;
+                    }
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    cout << "Нужно положительное число!\n";
+                }
+                auto* p = new TeamLeader(id, name, rate, budget, project, 0, extra);
+                p->setWorkTime(standartWorkTime);
+                p->calc();
                 staff.push_back(p);
-                appendToStaffFile(to_string(id) + ' ' + name + ' ' + position + ' ' + to_string(rate) + ' ' + to_string(budget) + ' ' + project + ' ' + to_string(bonus) + ' ' + to_string(extra));
+                appendToStaffFile(to_string(id) + ' ' + name + ' ' + position + ' ' + to_string(rate) + ' ' + to_string(budget) + ' ' + project + ' ' + to_string(extra));
                 addOrUpdateProject(id, project, budget);
                 cout << "Сотрудник успешно добавлен.\n";
             }
             else if (position == "ProjectManager")
             {
-                cout << "Введите название проекта: "; cin >> project;
-                //TODO Сделать проверку, что если проект уже существует, то берём бюджет из него
-                cout << "Введите бюджет проекта: "; cin >> budget;
-                //TODO После добавления нового проекта/бюджета заносить его в SeniorManager
-                cout << "Введите размер команды: "; cin >> extra;
+                cout << "Введите название проекта: ";
+                cin >> project;
+                budget = getOrCreateProjectBudget(project);
+                while (true)
+                {
+                    cout << "Введите размер команды: ";
+                    if (cin >> extra && (extra > 0))
+                    {
+                        break;
+                    }
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    cout << "Нужно положительное число!\n";
+                }
                 auto* p = new ProjectManager(id, name, budget, project, extra);
-                p->setWorkTime(160); p->calc();
+                p->setWorkTime(standartWorkTime);
+                p->calc();
                 staff.push_back(p);
                 appendToStaffFile(to_string(id) + ' ' + name + ' ' + position + ' ' + to_string(budget) + ' ' + project + ' ' + to_string(extra));
                 addOrUpdateProject(id, project, budget);
@@ -392,37 +667,92 @@ int main()
         else if (choice == 7)
         {
             int id;
-            string newProject;
-            double newBudget;
-            cout << "Введите ID сотрудника: "; cin >> id;
-            cout << "Введите новый проект: "; cin >> newProject;
-            //TODO Сделать проверку, что если проект уже существует, то берём бюджет из него
-            cout << "Введите бюджет проекта: "; cin >> newBudget;
-            //TODO После добавления нового проекта/бюджета заносить его в SeniorManager
+            double newBudget = 0;
+            string newProject = "Project_";
 
-            bool found = false;
+            cout << "Введите ID сотрудника: ";
+            cin >> id;
+
+            bool canBeAdded = false, found = false;
             for (Employee* emp : staff)
             {
                 if (emp->getId() == id)
                 {
+                    string oldProject = emp->getProject();
+                    emp->setProject(newProject);
                     if (emp->getProject() != "")
                     {
-                        emp->setProject(newProject);
-                        emp->calc();
-                        addOrUpdateProject(id, newProject, newBudget);
-                        cout << "Проект обновлён.\n";
-                        found = true;
-                        break;
+                        canBeAdded = true;
+                        emp->setProject(oldProject);
                     }
                     else
                     {
-                        cout << "У этого сотрудника нет проекта.\n";
+                        cout << "Сотрудник не может быть зачислен на проект!\n";
+                        canBeAdded = false;
                     }
+                    found = true;
+                    break;
                 }
             }
             if (!found)
             {
                 cout << "Сотрудник не найден.\n";
+            }
+
+            if (canBeAdded)
+            {
+                cout << "Введите новый проект: ";
+                cin >> newProject;
+                newBudget = getOrCreateProjectBudget(newProject);
+
+                for (Employee* emp : staff)
+                {
+                    if (emp->getId() == id)
+                    {
+                        string oldProject = emp->getProject();
+                        double budgetToRemove = emp->getBudget();
+                        emp->setProject(newProject);
+                        emp->setBudget(newBudget);
+                        addOrUpdateProject(id, newProject, newBudget);
+                        cout << "Проект обновлён.\n";
+                        emp->calc();
+                        for (Employee* emp : staff)
+                        {
+                            if (emp->getPosition() == "SeniorManager")
+                            {
+                                emp->syncBudgetsFromFile();
+                                emp->calc();
+                                break;
+                            }
+                        }
+
+                        bool projectStillUsed = false;
+                        for (Employee* e : staff)
+                        {
+                            if (e->getProject() == oldProject)
+                            {
+                                projectStillUsed = true;
+                                break;
+                            }
+                        }
+
+                        if (!projectStillUsed)
+                        {
+                            removeBudgetFromFile(budgetToRemove);
+                            for (Employee* emp : staff)
+                            {
+                                if (emp->getPosition() == "SeniorManager")
+                                {
+                                    emp->syncBudgetsFromFile();
+                                    emp->calc();
+                                    break;
+                                }
+                            }
+                        }
+
+                        break;
+                    }
+                }
             }
         }
         else if (choice == 8)

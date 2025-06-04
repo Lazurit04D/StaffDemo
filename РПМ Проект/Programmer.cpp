@@ -16,3 +16,8 @@ void Programmer::setProject(const string& project)
 {
     this->project = project;
 }
+
+void Programmer::setBudget(const double budget)
+{
+    this->budget = budget;
+}

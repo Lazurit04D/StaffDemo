@@ -21,3 +21,10 @@ void TeamLeader::setProject(const string& project)
 {
     this->project = project;
 }
+
+void TeamLeader::setBudget(const double budget)
+{
+    this->budget = budget;
+}
+
+void TeamLeader::syncBudgetsFromFile() {}

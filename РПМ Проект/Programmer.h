@@ -12,4 +12,5 @@ public:
     string getPosition() const override;
 
     void setProject(const string& project) override;
+    void setBudget(const double budget) override;
 };

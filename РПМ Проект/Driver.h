@@ -10,5 +10,9 @@ public:
 
     void setNightHours(int hours);
     double calcBonus() override;
+    double getBudget() const override;
     string getPosition() const override;
+
+    void setProject(const string& project) override;
+    void setBudget(const double budget) override;
 };

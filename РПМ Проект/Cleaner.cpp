@@ -6,3 +6,7 @@ string Cleaner::getPosition() const
 {
     return "Cleaner";
 }
+
+void Cleaner::setProject(const string& project) {}
+
+void Cleaner::setBudget(const double budget) {}

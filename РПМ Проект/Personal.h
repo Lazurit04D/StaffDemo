@@ -16,5 +16,8 @@ public:
 
     void calc() override;
     void printInfo() const override;
+    double getBudget() const override;
     string getPosition() const override;
+
+    void syncBudgetsFromFile() override;
 };

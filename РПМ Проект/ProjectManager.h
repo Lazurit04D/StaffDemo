@@ -21,7 +21,11 @@ public:
     void printInfo() const override;
 
     string getProject() const override;
+    double getBudget() const override;
     string getPosition() const override;
 
     void setProject(const string& project) override;
+    void setBudget(const double budget) override;
+
+    void syncBudgetsFromFile() override;
 };

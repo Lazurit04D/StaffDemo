@@ -33,7 +33,14 @@ void Personal::printInfo() const
         << payment << '\n';
 }
 
+double Personal::getBudget() const
+{
+    return 0.0;
+}
+
 string Personal::getPosition() const
 {
     return "Personal";
 }
+
+void Personal::syncBudgetsFromFile() {}
