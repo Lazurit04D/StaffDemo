@@ -1,4 +1,3 @@
-//небольшая проверка git 
 #include <vector>
 #include <string>
 #include <limits>
