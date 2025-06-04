@@ -1,0 +1,30 @@
+#pragma once
+#include <string>
+#include <iomanip>
+using namespace std;
+
+class Employee
+{
+protected:
+    int id;
+    string name;
+    int worktime;
+    double payment;
+public:
+    Employee(int id, const string& name);
+
+    virtual void setWorkTime(int time) = 0;
+    virtual void calc() = 0;
+    virtual void printInfo() const = 0;
+
+    virtual string getProject() const;
+    virtual string getPosition() const = 0;
+
+    virtual double getPayment() const;
+    virtual string getName() const;
+    virtual int getId() const;
+
+    virtual void setProject(const string& project);
+
+    virtual ~Employee() {}
+};
