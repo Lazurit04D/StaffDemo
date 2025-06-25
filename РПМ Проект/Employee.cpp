@@ -7,6 +7,16 @@ string Employee::getProject() const
     return "";
 }
 
+vector<double> Employee::getBudgets() const
+{
+    return {};
+}
+
+int Employee::getWorkTime() const
+{
+    return worktime;
+}
+
 double Employee::getPayment() const
 {
     return payment;

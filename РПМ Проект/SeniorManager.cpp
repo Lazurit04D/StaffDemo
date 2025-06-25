@@ -4,6 +4,8 @@
 #include <sstream>
 using namespace std;
 
+string SeniorManager::fileName = "staff.txt";
+
 SeniorManager::SeniorManager(int id, const string& name, const vector<double>& budgets, int peopleCount) : Employee(id, name), budgets(budgets), peopleCount(peopleCount) {}
 
 void SeniorManager::setWorkTime(int time)
@@ -50,6 +52,11 @@ double SeniorManager::getBudget() const
     return 0.0;
 }
 
+vector<double> SeniorManager::getBudgets() const
+{
+    return budgets;
+}
+
 string SeniorManager::getPosition() const
 {
     return "SeniorManager";
@@ -59,9 +66,14 @@ void SeniorManager::setProject(const string& project) {}
 
 void SeniorManager::setBudget(const double budget) {}
 
+void SeniorManager::setFileName(const string& name)
+{
+    fileName = name;
+}
+
 void SeniorManager::syncBudgetsFromFile()
 {
-    ifstream in("staff.txt");
+    ifstream in(fileName);
     string line;
 
     while (getline(in, line))

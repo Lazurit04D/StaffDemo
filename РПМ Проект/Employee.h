@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <iomanip>
+#include <vector>
 using namespace std;
 
 class Employee
@@ -19,8 +20,10 @@ public:
 
     virtual string getProject() const;
     virtual double getBudget() const = 0;
+    virtual vector<double> getBudgets() const;
     virtual string getPosition() const = 0;
 
+    virtual int getWorkTime() const;
     virtual double getPayment() const;
     virtual string getName() const;
     virtual int getId() const;

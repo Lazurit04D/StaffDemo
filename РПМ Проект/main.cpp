@@ -15,6 +15,7 @@
 #include "TeamLeader.h"
 #include "Programmer.h"
 #include "ProjectManager.h"
+#include "SeniorManager.h"
 using namespace std;
 
 string toLower(const string& s)
@@ -400,6 +401,7 @@ int main()
 {
     SetConsoleCP(1251);
     SetConsoleOutputCP(1251);
+    SeniorManager::setFileName("staff.txt");
 
     int standartWorkTime = 50;
     vector<Employee*> staff = StaffFactory::makeStaff("staff.txt");
